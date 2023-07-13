@@ -343,28 +343,28 @@ class Registration(ShellCommandTask):
         affine_transform: File = field(
             metadata={
                 "help_string": "affine transform",
-                "output_file_template": "{output_prefix}0GenericAffine.mat",
+                "output_file_template": "{output_transform_prefix}0GenericAffine.mat",
             }
         )
 
         forward_warp_field: File = field(
             metadata={
                 "help_string": "forward warp field",
-                "output_file_template": "{output_prefix}1Warp.nii.gz",
+                "output_file_template": "{output_transform_prefix}1Warp.nii.gz",
             }
         )
 
         inverse_warp_field: File = field(
             metadata={
                 "help_string": "inverse warp field",
-                "output_file_template": "{output_prefix}1InverseWarp.nii.gz",
+                "output_file_template": "{output_transform_prefix}1InverseWarp.nii.gz",
             }
         )
 
         velocity_field: File = field(
             metadata={
                 "help_string": "velocity field",
-                "output_file_template": "{output_prefix}1VelocityField.nii.gz",
+                "output_file_template": "{output_transform_prefix}1VelocityField.nii.gz",
             }
         )
 
