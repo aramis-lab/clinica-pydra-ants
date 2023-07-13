@@ -58,21 +58,27 @@ class Registration(ShellCommandTask):
             }
         )
 
-        @staticmethod
-        def format_output(output_transform_prefix, warped_moving_image, warped_fixed_image) -> str:
-            return "-o {}".format(
-                f"[{output_transform_prefix},{warped_moving_image},{warped_fixed_image}]"
-                if all([warped_moving_image, warped_fixed_image])
-                else output_transform_prefix
-            )
+        fixed_image: PathLike = field(metadata={"help_string": "fixed image", "mandatory": True})
 
-        output_: str = field(metadata={"help_string": "output parameter", "readonly": True, "formatter": format_output})
+        moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True})
+
+        output_: str = field(
+            metadata={
+                "help_string": "output parameter",
+                "argstr": "-o [{output_transform_prefix},{warped_moving_image},{warped_fixed_image}]",
+                "readonly": True,
+            }
+        )
 
         output_transform_prefix: str = field(default="output", metadata={"help_string": "output transform prefix"})
 
-        warped_moving_image: PathLike = field(metadata={"help_string": "warped moving image"})
+        warped_moving_image: str = field(
+            metadata={"help_string": "warped moving image", "output_file_template": "{moving_image}_warped"}
+        )
 
-        warped_fixed_image: PathLike = field(metadata={"help_string": "warped fixed image"})
+        warped_fixed_image: str = field(
+            metadata={"help_string": "warped fixed image", "output_file_template": "{fixed_image}_warped"}
+        )
 
         @staticmethod
         def format_metric(
@@ -108,10 +114,6 @@ class Registration(ShellCommandTask):
                 "allowed_values": {"CC", "Demons", "GC", "Mattes", "MeanSquares", "MI"},
             }
         )
-
-        fixed_image: PathLike = field(metadata={"help_string": "fixed image"})
-
-        moving_image: PathLike = field(metadata={"help_string": "moving image"})
 
         metric_weight: float = field(default=1.0, metadata={"help_string": "metric weighting"})
 
@@ -326,20 +328,6 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class OutputSpec(ShellOutSpec):
-        warped_moving_image: File = field(
-            metadata={
-                "help_string": "moving image warped to fixed image space",
-                "output_file_template": "{warped_moving_image}",
-            }
-        )
-
-        warped_fixed_image: File = field(
-            metadata={
-                "help_string": "fixed image warped to moving image space",
-                "output_file_template": "{warped_fixed_image}",
-            }
-        )
-
         affine_transform: File = field(
             metadata={
                 "help_string": "affine transform",
