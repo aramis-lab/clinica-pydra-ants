@@ -322,8 +322,6 @@ class Registration(ShellCommandTask):
             },
         )
 
-        use_minc_format: bool = field(metadata={"help_string": "save transforms to MINC format", "argstr": "--minc"})
-
         random_seed: int = field(metadata={"help_string": "random seed", "argstr": "--random-seed"})
 
         verbose: bool = field(metadata={"help_string": "verbose output", "formatter": lambda verbose: f"{verbose:d}"})
