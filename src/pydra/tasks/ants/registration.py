@@ -270,12 +270,12 @@ class Registration(ShellCommandTask):
             default=False, metadata={"help_string": "specify smoothing in millimeters instead of voxels"}
         )
 
-        shrink_factor_per_level: Sequence[int] = field(
+        shrink_factors: Sequence[int] = field(
             metadata={
                 "help_string": "shrink factor for each level",
                 "mandatory": True,
-                "formatter": lambda shrink_factor_per_level: "-f {}".format(
-                    "x".join(str(f) for f in shrink_factor_per_level)
+                "formatter": lambda shrink_factors: "-f {}".format(
+                    "x".join(str(f) for f in shrink_factors)
                 ),
             }
         )
