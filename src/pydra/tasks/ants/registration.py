@@ -253,19 +253,21 @@ class Registration(ShellCommandTask):
 
         convergence_window_size: float = field(default=10, metadata={"help_string": "convergence window size"})
 
-        smoothing_per_level: Sequence[int] = field(
+        smoothing_sigmas: Sequence[int] = field(
             metadata={
-                "help_string": "Gaussian smoothing for each level",
+                "help_string": "sigma of Gaussian smoothing for each level",
                 "mandatory": True,
-                "formatter": lambda smoothing_per_level, unit_of_smoothing: (
-                    "-s {0}{1}".format("x".join(str(s) for s in smoothing_per_level), unit_of_smoothing)
+                "formatter": lambda smoothing_sigmas, smoothing_in_mm: (
+                    "-s {0}{1}".format(
+                        "x".join(str(s) for s in smoothing_sigmas),
+                        "mm" if smoothing_in_mm else "vox",
+                    )
                 ),
             }
         )
 
-        unit_of_smoothing: str = field(
-            default="vox",
-            metadata={"help_string": "unit of smoothing (vox or mm)", "allowed_values": {"vox", "mm"}},
+        smoothing_in_mm: bool = field(
+            default=False, metadata={"help_string": "specify smoothing in millimeters instead of voxels"}
         )
 
         shrink_factor_per_level: Sequence[int] = field(
