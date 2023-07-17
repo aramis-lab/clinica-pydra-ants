@@ -58,17 +58,15 @@ class Registration(ShellCommandTask):
 
         moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True})
 
-        output_ = field(
+        output_transform_prefix: str = field(
+            default="output",
             metadata={
-                "help_string": "output parameter",
-                "readonly": True,
+                "help_string": "output transform prefix",
                 "formatter": lambda output_transform_prefix, warped_fixed_image, warped_moving_image: (
                     f"-o [{output_transform_prefix}, {warped_fixed_image}, {warped_moving_image}]"
                 ),
-            }
+            },
         )
-
-        output_transform_prefix: str = field(default="output", metadata={"help_string": "output transform prefix"})
 
         warped_fixed_image: str = field(
             metadata={
