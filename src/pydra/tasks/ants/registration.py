@@ -160,8 +160,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "rigid metric parameter",
                 "readonly": True,
-                "formatter": lambda enable_rigid_stage, rigid_metric_name, fixed_image, moving_image,
-                                    rigid_metric_parameter, rigid_sampling_strategy, rigid_sampling_rate: (
+                "formatter": lambda enable_rigid_stage, rigid_metric_name, fixed_image, moving_image, rigid_metric_parameter, rigid_sampling_strategy, rigid_sampling_rate: (
                     "-m {}[{}, {}, 1, {}, {}, {}]".format(
                         rigid_metric_name,
                         fixed_image,
@@ -260,8 +259,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "metric parameter for affine stage",
                 "readonly": True,
-                "formatter": lambda enable_affine_stage, affine_metric_name, fixed_image, moving_image,
-                                    affine_metric_parameter, affine_sampling_strategy, affine_sampling_rate: (
+                "formatter": lambda enable_affine_stage, affine_metric_name, fixed_image, moving_image, affine_metric_parameter, affine_sampling_strategy, affine_sampling_rate: (
                     "-m {}[{}, {}, 1, {}, {}, {}]".format(
                         affine_metric_name,
                         fixed_image,
@@ -360,8 +358,7 @@ class Registration(ShellCommandTask):
                     "SyN",
                     "BSplineSyN",
                 },
-                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma,
-                                    syn_total_sigma: (
+                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma: (
                     f"-t {syn_transform}[{syn_gradient_step}, {syn_flow_sigma}, {syn_total_sigma}]"
                     if enable_syn_stage
                     else ""
@@ -394,22 +391,16 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "convergence for SyN stage",
                 "formatter": lambda enable_syn_stage, syn_convergence, syn_threshold, syn_window_size: (
-                    "-c [{}, {}, {}]".format(
-                        "x".join(str(c) for c in syn_convergence), syn_threshold, syn_window_size
-                    )
+                    "-c [{}, {}, {}]".format("x".join(str(c) for c in syn_convergence), syn_threshold, syn_window_size)
                     if enable_syn_stage
                     else ""
                 ),
             },
         )
 
-        syn_threshold: float = field(
-            default=1e-6, metadata={"help_string": "convergence threshold for SyN stage"}
-        )
+        syn_threshold: float = field(default=1e-6, metadata={"help_string": "convergence threshold for SyN stage"})
 
-        syn_window_size: int = field(
-            default=10, metadata={"help_string": "convergence window size for SyN stage"}
-        )
+        syn_window_size: int = field(default=10, metadata={"help_string": "convergence window size for SyN stage"})
 
         syn_shrink_factors: Sequence[int] = field(
             default=(8, 4, 2, 1),
