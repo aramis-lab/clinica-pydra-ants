@@ -154,16 +154,16 @@ class Registration(ShellCommandTask):
 
         rigid_gradient_step: bool = field(default=0.1, metadata={"help_string": "gradient step for rigid stage"})
 
-        rigid_metric_: str = field(
+        rigid_metric: str = field(
             metadata={
                 "help_string": "rigid metric parameter",
-                "readonly": True,
-                "formatter": lambda enable_rigid_stage, rigid_metric_name, fixed_image, moving_image, rigid_metric_parameter, rigid_sampling_strategy, rigid_sampling_rate: (
+                "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
+                "formatter": lambda enable_rigid_stage, rigid_metric, fixed_image, moving_image, rigid_radius, rigid_num_bins, rigid_sampling_strategy, rigid_sampling_rate: (
                     "-m {}[{}, {}, 1, {}, {}, {}]".format(
-                        rigid_metric_name,
+                        rigid_metric,
                         fixed_image,
                         moving_image,
-                        rigid_metric_parameter,
+                        rigid_num_bins if rigid_metric in {"MI", "Mattes"} else rigid_radius,
                         rigid_sampling_strategy,
                         rigid_sampling_rate,
                     )
@@ -173,15 +173,9 @@ class Registration(ShellCommandTask):
             }
         )
 
-        rigid_metric_name: str = field(
-            default="MI",
-            metadata={
-                "help_string": "metric name for rigid stage",
-                "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
-            },
-        )
+        rigid_radius: int = field(default=4, metadata={"help_string": "radius for rigid stage"})
 
-        rigid_metric_parameter: float = field(default=32, metadata={"help_string": "metric parameter for rigid stage"})
+        rigid_num_bins: int = field(default=32, metadata={"help_string": "number of bins for rigid stage"})
 
         rigid_sampling_strategy: str = field(
             default="Regular",
