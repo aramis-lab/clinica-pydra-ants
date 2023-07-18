@@ -139,7 +139,7 @@ class Registration(ShellCommandTask):
 
         order: int = field(default=3, metadata={"help_string": "order parameter for interpolation"})
 
-        enable_rigid_stage = field(default=True, metadata={"help_string": "enable rigid stage"})
+        enable_rigid_stage = field(default=True, metadata={"help_string": "enable rigid registration stage"})
 
         rigid_transform: str = field(
             default="Rigid",
