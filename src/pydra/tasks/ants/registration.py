@@ -143,6 +143,15 @@ class Registration(ShellCommandTask):
 
         moving_mask: PathLike = field(metadata={"help_string": "mask applied to the moving image"})
 
+        enable_initial_stage = field(
+            metadata={
+                "help_string": "enable initial stage",
+                "formatter": lambda enable_initial_stage, fixed_image, moving_image: (
+                    f"-r [{fixed_image}, {moving_image}, 1]" if enable_initial_stage else ""
+                ),
+            }
+        )
+
         enable_rigid_stage = field(default=True, metadata={"help_string": "enable rigid registration stage"})
 
         rigid_transform: str = field(
@@ -548,6 +557,7 @@ def registration_syn_quick(
         collapse_output_transforms=collapse_output_transforms,
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
+        enable_initial_stage=True,
         enable_rigid_stage=transform_type not in {"bo", "so"},
         rigid_transform="Translation" if transform_type == "t" else "Rigid",
         rigid_metric="GC" if use_reproducible_mode else "MI",
