@@ -50,10 +50,6 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class InputSpec(ShellSpec):
-        dimensionality: int = field(
-            metadata={"help_string": "force image dimensionality", "argstr": "-d", "allowed_values": {2, 3, 4}}
-        )
-
         fixed_image: PathLike = field(metadata={"help_string": "fixed image", "mandatory": True})
 
         moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True})
