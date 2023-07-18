@@ -17,7 +17,7 @@ Examples
 ...     spline_distance=32,
 ... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration ... -t BSplineSyn[0.2, 32, 0, 3] ... '
+'antsRegistration ... -t BSplineSyn[0.2, 32, 0, 3] ...'
 
 >>> task = registration_syn_quick(
 ...     fixed_image="reference.nii",
@@ -144,12 +144,45 @@ class Registration(ShellCommandTask):
 
         moving_mask: PathLike = field(metadata={"help_string": "mask applied to the moving image"})
 
-        enable_initial_stage = field(
+        initial_fixed_transforms: Sequence[PathLike] = field(
             metadata={
-                "help_string": "enable initial stage",
-                "formatter": lambda enable_initial_stage, fixed_image, moving_image: (
-                    f"-r [{fixed_image}, {moving_image}, 1]" if enable_initial_stage else ""
+                "help_string": "initialize composite fixed transform with these transforms",
+                "formatter": lambda initial_fixed_transforms, invert_fixed_transforms: (
+                    ""
+                    if not initial_fixed_transforms
+                    else " ".join(f"-q {x}" for x in initial_fixed_transforms)
+                    if not invert_fixed_transforms
+                    else " ".join(f"-q [{x}, {y:d}]" for x, y in zip(initial_fixed_transforms, invert_fixed_transforms))
                 ),
+            }
+        )
+
+        invert_fixed_transforms: Sequence[bool] = field(
+            metadata={
+                "help_string": "specify which initial fixed transforms to invert",
+                "requires": {"initial_fixed_transforms"},
+            }
+        )
+
+        initial_moving_transforms: Sequence[PathLike] = field(
+            metadata={
+                "help_string": "initialize composite moving transform with these transforms",
+                "formatter": lambda initial_moving_transforms, invert_moving_transforms, fixed_image, moving_image: (
+                    f"-r [{fixed_image}, {moving_image}, 1]"
+                    if not initial_moving_transforms
+                    else " ".join(f"-r {x}" for x in initial_moving_transforms)
+                    if not invert_moving_transforms
+                    else " ".join(
+                        f"-r [{x}, {y:d}]" for x, y in zip(initial_moving_transforms, invert_moving_transforms)
+                    )
+                ),
+            }
+        )
+
+        invert_moving_transforms: Sequence[bool] = field(
+            metadata={
+                "help_string": "specify which initial moving transforms to invert",
+                "requires": {"initial_moving_transforms"},
             }
         )
 
@@ -559,7 +592,6 @@ def registration_syn(
         collapse_output_transforms=collapse_output_transforms,
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
-        enable_initial_stage=True,
         enable_rigid_stage=transform_type not in {"bo", "so"},
         rigid_transform="Translation" if transform_type == "t" else "Rigid",
         rigid_metric="GC" if use_reproducible_mode else "MI",
