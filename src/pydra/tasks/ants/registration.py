@@ -253,16 +253,16 @@ class Registration(ShellCommandTask):
 
         affine_gradient_step: bool = field(default=0.1, metadata={"help_string": "gradient step for affine stage"})
 
-        affine_metric_: str = field(
+        affine_metric: str = field(
             metadata={
                 "help_string": "metric parameter for affine stage",
-                "readonly": True,
-                "formatter": lambda enable_affine_stage, affine_metric_name, fixed_image, moving_image, affine_metric_parameter, affine_sampling_strategy, affine_sampling_rate: (
+                "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
+                "formatter": lambda enable_affine_stage, affine_metric, fixed_image, moving_image, affine_radius, affine_num_bins, affine_sampling_strategy, affine_sampling_rate: (
                     "-m {}[{}, {}, 1, {}, {}, {}]".format(
-                        affine_metric_name,
+                        affine_metric,
                         fixed_image,
                         moving_image,
-                        affine_metric_parameter,
+                        affine_num_bins if affine_metric in {"MI", "Mattes"} else affine_radius,
                         affine_sampling_strategy,
                         affine_sampling_rate,
                     )
@@ -272,17 +272,9 @@ class Registration(ShellCommandTask):
             }
         )
 
-        affine_metric_name: str = field(
-            default="MI",
-            metadata={
-                "help_string": "metric name for affine stage",
-                "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
-            },
-        )
+        affine_radius: int = field(default=4, metadata={"help_string": "radius for affine stage"})
 
-        affine_metric_parameter: float = field(
-            default=32, metadata={"help_string": "metric parameter for affine stage"}
-        )
+        affine_num_bins: int = field(default=32, metadata={"help_string": "number of bins for affine stage"})
 
         affine_sampling_strategy: str = field(
             default="Regular",
