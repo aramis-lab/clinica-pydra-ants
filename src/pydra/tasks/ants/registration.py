@@ -135,6 +135,20 @@ class Registration(ShellCommandTask):
 
         order: int = field(default=3, metadata={"help_string": "order parameter for interpolation"})
 
+        masks_: str = field(
+            metadata={
+                "help_string": "masks parameter",
+                "readonly": True,
+                "formatter": lambda fixed_mask, moving_mask: (
+                    f"-x [{fixed_mask or 'NULL'}, {moving_mask or 'NULL'}]" if any([fixed_mask, moving_mask]) else ""
+                ),
+            }
+        )
+
+        fixed_mask: PathLike = field(metadata={"help_string": "mask applied to the fixed image"})
+
+        moving_mask: PathLike = field(metadata={"help_string": "mask applied to the moving image"})
+
         enable_rigid_stage = field(default=True, metadata={"help_string": "enable rigid registration stage"})
 
         rigid_transform: str = field(
