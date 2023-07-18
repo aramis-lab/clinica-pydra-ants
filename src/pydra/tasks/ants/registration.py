@@ -29,8 +29,9 @@ Examples
 'antsRegistration ... -x [mask.nii, NULL] ... --random-seed 42 ...'
 """
 
-__all__ = ["Registration", "registration_syn_quick"]
+__all__ = ["Registration", "registration_syn", "registration_syn_quick"]
 
+from functools import partial
 from os import PathLike
 from typing import Optional, Sequence
 
@@ -530,7 +531,7 @@ class Registration(ShellCommandTask):
     executable = "antsRegistration"
 
 
-def registration_syn_quick(
+def registration_syn(
     fixed_image: PathLike,
     moving_image: PathLike,
     is_large_image: bool = False,
@@ -548,6 +549,7 @@ def registration_syn_quick(
     collapse_output_transforms: bool = True,
     random_seed: Optional[int] = None,
     verbose: bool = False,
+    quick: bool = False,
     **kwargs,
 ) -> Registration:
     return Registration(
@@ -562,25 +564,28 @@ def registration_syn_quick(
         rigid_transform="Translation" if transform_type == "t" else "Rigid",
         rigid_metric="GC" if use_reproducible_mode else "MI",
         rigid_radius=1,
-        rigid_num_bins=num_bins,
-        rigid_convergence=(1000, 500, 250, 100),
+        rigid_num_bins=32,
+        rigid_convergence=(1000, 500, 250, 0 if quick else 100),
         rigid_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
         enable_affine_stage=transform_type in {"a", "b", "s"},
         affine_transform="Affine",
         affine_metric="GC" if use_reproducible_mode else "MI",
         affine_radius=1,
-        affine_num_bins=num_bins,
-        affine_convergence=(1000, 500, 250, 100),
+        affine_num_bins=32,
+        affine_convergence=(1000, 500, 250, 0 if quick else 100),
         affine_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         affine_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
         enable_syn_stage=transform_type[0] in {"b", "s"},
         syn_transform="BSplineSyn" if transform_type[0] == "b" else "Syn",
         syn_gradient_step=gradient_step,
         syn_flow_spline_distance=spline_distance,
-        syn_metric="CC",
+        syn_metric="CC" if use_reproducible_mode else "MI",
         syn_radius=radius,
-        syn_convergence=(100, 100, 70, 50, 20) if is_large_image else (100, 70, 50, 20),
+        syn_num_bins=num_bins,
+        syn_convergence=(
+            (100, 100, 70, 50, 0 if quick else 20) if is_large_image else (100, 70, 50, 0 if quick else 20)
+        ),
         syn_shrink_factors=(10, 6, 4, 2, 1) if is_large_image else (8, 4, 2, 1),
         syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
@@ -589,3 +594,6 @@ def registration_syn_quick(
         verbose=verbose,
         **kwargs,
     )
+
+
+registration_syn_quick = partial(registration_syn, quick=True)
