@@ -534,7 +534,7 @@ class Registration(ShellCommandTask):
 def registration_syn(
     fixed_image: PathLike,
     moving_image: PathLike,
-    is_large_image: bool = False,
+    is_large_image: bool = True,
     output_prefix: str = "output",
     transform_type: str = "s",
     num_bins: int = 32,
