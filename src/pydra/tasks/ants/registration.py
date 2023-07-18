@@ -5,40 +5,34 @@ Registration
 Examples
 --------
 
->>> task = RegistrationSyNQuick(
-...     dimensionality=3,
-...     fixed_image="reference.nii",
-...     moving_image="structural.nii",
-... )
+>>> task = registration_syn_quick(fixed_image="reference.nii", moving_image="structural.nii")
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistrationSyNQuick.sh -d 3 -f reference.nii -m structural.nii ...'
+'antsRegistration -o [output, .../reference_warped.nii, .../structural_warped.nii] ...'
 
->>> task = RegistrationSyNQuick(
-...     dimensionality=3,
+>>> task = registration_syn_quick(
 ...     fixed_image="reference.nii",
 ...     moving_image="structural.nii", 
 ...     transform_type="b",
+...     gradient_step=0.2,
 ...     spline_distance=32,
-...     gradient_step_size=0.2,
-...     random_seed=42,
 ... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistrationSyNQuick.sh ... -t b -s 32 -g 0.2 ... -e 42'
+'antsRegistration ... -t BSplineSyn[0.2, 32, 0, 3] ... '
 
->>> task = RegistrationSyNQuick(
-...     dimensionality=3,
+>>> task = registration_syn_quick(
 ...     fixed_image="reference.nii",
 ...     moving_image="structural.nii",
 ...     fixed_mask="mask.nii",
+...     random_seed=42,
 ... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistrationSyNQuick.sh ... -x mask.nii ...'
+'antsRegistration ... -x [mask.nii, NULL] ... --random-seed 42 ...'
 """
 
-__all__ = ["RegistrationSyNQuick"]
+__all__ = ["Registration", "registration_syn_quick"]
 
 from os import PathLike
-from typing import Sequence
+from typing import Optional, Sequence
 
 from attrs import NOTHING, define, field
 from pydra.engine.specs import File, ShellOutSpec, ShellSpec, SpecInfo
@@ -527,167 +521,61 @@ class Registration(ShellCommandTask):
     executable = "antsRegistration"
 
 
-class RegistrationSyNQuick(ShellCommandTask):
-    """Task definition for antsRegistrationSyNQuick."""
-
-    @define(kw_only=True)
-    class InputSpec(ShellSpec):
-        dimensionality: int = field(
-            metadata={
-                "help_string": "force image dimensionality (2 or 3)",
-                "mandatory": True,
-                "argstr": "-d",
-                "allowed_values": {2, 3},
-            }
-        )
-
-        fixed_image: PathLike = field(metadata={"help_string": "fixed image", "mandatory": True, "argstr": "-f"})
-
-        moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True, "argstr": "-m"})
-
-        output_prefix: str = field(
-            default="output", metadata={"help_string": "prefix for output files", "argstr": "-o"}
-        )
-
-        num_threads: int = field(default=1, metadata={"help_string": "number of threads", "argstr": "-n"})
-
-        initial_transforms: Sequence[PathLike] = field(metadata={"help_string": "initial transforms", "argstr": "-i"})
-
-        transform_type: str = field(
-            default="s",
-            metadata={
-                "help_string": "transform type",
-                "argstr": "-t",
-                "allowed_values": {
-                    "t",  # translation
-                    "r",  # rigid
-                    "a",  # rigid + affine
-                    "s",  # rigid + affine + syn
-                    "sr",  # rigid + syn
-                    "so",  # syn only
-                    "b",  # rigid + affine + b-spline
-                    "br",  # rigid + b-spline
-                    "bo",  # b-spline only
-                },
-            },
-        )
-
-        num_histogram_bins: int = field(
-            default=32,
-            metadata={
-                "help_string": "number of histogram bins in SyN stage",
-                "formatter": lambda transform_type, num_histogram_bins: (
-                    f"-r {num_histogram_bins}" if "s" in transform_type else ""
-                ),
-            },
-        )
-
-        spline_distance: float = field(
-            default=26,
-            metadata={
-                "help_string": "spline distance for deformable B-spline SyN transform",
-                "formatter": lambda transform_type, spline_distance: (
-                    f"-s {spline_distance}" if "b" in transform_type else ""
-                ),
-            },
-        )
-
-        gradient_step_size: float = field(
-            default=0.1,
-            metadata={
-                "help_string": "gradient step size for SyN and B-spline SyN",
-                "formatter": lambda transform_type, gradient_step_size: (
-                    f"-g {gradient_step_size}" if any(c in transform_type for c in ("s", "b")) else ""
-                ),
-            },
-        )
-
-        mask_parameters: str = field(
-            metadata={
-                "help_string": "mask parameters",
-                "readonly": True,
-                "formatter": lambda fixed_mask, moving_mask: (
-                    "" if not fixed_mask else f"-x {fixed_mask},{moving_mask}" if moving_mask else f"-x {fixed_mask}"
-                ),
-            }
-        )
-
-        fixed_mask: PathLike = field(metadata={"help_string": "mask applied to the fixed image"})
-
-        moving_mask: PathLike = field(
-            metadata={"help_string": "mask applied to the moving image", "requires": {"fixed_mask"}}
-        )
-
-        precision: str = field(
-            default="double",
-            metadata={
-                "help_string": "use float or double precision",
-                "allowed_values": {"float", "double"},
-                "formatter": lambda precision: f"-p {precision[0]}",
-            },
-        )
-
-        use_histogram_matching: bool = field(
-            default=False,
-            metadata={
-                "help_string": "use histogram matching",
-                "formatter": lambda use_histogram_matching: f"-j {use_histogram_matching:d}",
-            },
-        )
-
-        use_reproducible_mode: bool = field(
-            default=False,
-            metadata={
-                "help_string": "use reproducible mode",
-                "formatter": lambda use_reproducible_mode: f"-y {use_reproducible_mode:d}",
-            },
-        )
-
-        random_seed: int = field(metadata={"help_string": "fix random seed", "argstr": "-e"})
-
-    input_spec = SpecInfo(name="Input", bases=(InputSpec,))
-
-    @define(kw_only=True)
-    class OutputSpec(ShellOutSpec):
-        warped_moving_image: File = field(
-            metadata={
-                "help_string": "moving image warped to fixed image space",
-                "output_file_template": "{output_prefix}Warped.nii.gz",
-            }
-        )
-
-        warped_fixed_image: File = field(
-            metadata={
-                "help_string": "fixed image warped to moving image space",
-                "output_file_template": "{output_prefix}InverseWarped.nii.gz",
-            }
-        )
-
-        affine_transform: File = field(
-            metadata={
-                "help_string": "affine transform",
-                "output_file_template": "{output_prefix}0GenericAffine.mat",
-            }
-        )
-
-        forward_warp_field: File = field(
-            metadata={
-                "help_string": "forward warp field",
-                "callable": lambda transform_type, output_prefix: (
-                    f"{output_prefix}1Warp.nii.gz" if transform_type not in ("t", "r", "a") else NOTHING
-                ),
-            }
-        )
-
-        inverse_warp_field: File = field(
-            metadata={
-                "help_string": "inverse warp field",
-                "callable": lambda transform_type, output_prefix: (
-                    f"{output_prefix}1InverseWarp.nii.gz" if transform_type not in ("t", "r", "a") else NOTHING
-                ),
-            }
-        )
-
-    output_spec = SpecInfo(name="Output", bases=(OutputSpec,))
-
-    executable = "antsRegistrationSyNQuick.sh"
+def registration_syn_quick(
+    fixed_image: PathLike,
+    moving_image: PathLike,
+    is_large_image: bool = False,
+    output_prefix: str = "output",
+    transform_type: str = "s",
+    num_bins: int = 32,
+    gradient_step: float = 0.1,
+    spline_distance: int = 26,
+    radius: int = 4,
+    fixed_mask: Optional[PathLike] = None,
+    moving_mask: Optional[PathLike] = None,
+    precision: str = "double",
+    use_histogram_matching: bool = False,
+    use_reproducible_mode: bool = False,
+    collapse_output_transforms: bool = True,
+    random_seed: Optional[int] = None,
+    verbose: bool = False,
+    **kwargs,
+) -> Registration:
+    return Registration(
+        fixed_image=fixed_image,
+        moving_image=moving_image,
+        output_transform_prefix=output_prefix,
+        collapse_output_transforms=collapse_output_transforms,
+        fixed_mask=fixed_mask or NOTHING,
+        moving_mask=moving_mask or NOTHING,
+        enable_rigid_stage=transform_type not in {"bo", "so"},
+        rigid_transform="Translation" if transform_type == "t" else "Rigid",
+        rigid_metric="GC" if use_reproducible_mode else "MI",
+        rigid_radius=1,
+        rigid_num_bins=num_bins,
+        rigid_convergence=(1000, 500, 250, 100),
+        rigid_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
+        rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
+        enable_affine_stage=transform_type in {"a", "b", "s"},
+        affine_transform="Affine",
+        affine_metric="GC" if use_reproducible_mode else "MI",
+        affine_radius=1,
+        affine_num_bins=num_bins,
+        affine_convergence=(1000, 500, 250, 100),
+        affine_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
+        affine_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
+        enable_syn_stage=transform_type[0] in {"b", "s"},
+        syn_transform="BSplineSyn" if transform_type[0] == "b" else "Syn",
+        syn_gradient_step=gradient_step,
+        syn_flow_spline_distance=spline_distance,
+        syn_metric="CC",
+        syn_radius=radius,
+        syn_convergence=(100, 100, 70, 50, 20) if is_large_image else (100, 70, 50, 20),
+        syn_shrink_factors=(10, 6, 4, 2, 1) if is_large_image else (8, 4, 2, 1),
+        syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
+        use_histogram_matching=use_histogram_matching,
+        precision=precision,
+        random_seed=random_seed or (1 if use_reproducible_mode else NOTHING),
+        verbose=verbose,
+        **kwargs,
+    )
