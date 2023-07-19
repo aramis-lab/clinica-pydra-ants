@@ -382,15 +382,13 @@ class Registration(ShellCommandTask):
             default="Syn",
             metadata={
                 "help_string": "SyN transform",
-                "allowed_values": {"BSpline", "SyN", "BSplineSyN"},
-                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_spline_distance, syn_flow_sigma, syn_total_sigma, syn_flow_spline_distance, syn_total_spline_distance, syn_spline_order: (
+                "allowed_values": {"GaussianDisplacementField", "SyN", "BSplineSyN"},
+                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_flow_spline_distance, syn_total_spline_distance, syn_spline_order: (
                     "-t {}[{}]".format(
                         syn_transform,
-                        f"{syn_gradient_step}, {syn_spline_distance}"
-                        if syn_transform == "BSpline"
-                        else f"{syn_gradient_step}, {syn_flow_sigma}, {syn_total_sigma}"
-                        if syn_transform == "Syn"
-                        else f"{syn_gradient_step}, {syn_flow_spline_distance}, {syn_total_spline_distance}, {syn_spline_order}",
+                        f"{syn_gradient_step}, {syn_flow_spline_distance}, {syn_total_spline_distance}, {syn_spline_order}"
+                        if syn_transform == "BSplineSyn"
+                        else f"{syn_gradient_step}, {syn_flow_sigma}, {syn_total_sigma}",
                     )
                     if enable_syn_stage
                     else ""
@@ -399,8 +397,6 @@ class Registration(ShellCommandTask):
         )
 
         syn_gradient_step: bool = field(default=0.1, metadata={"help_string": "gradient step for SyN stage"})
-
-        syn_spline_distance: int = field(default=26, metadata={"help_string": "spline distance for SyN stage"})
 
         syn_flow_sigma: float = field(default=3, metadata={"help_string": "sigma for flow field in SyN stage"})
 
