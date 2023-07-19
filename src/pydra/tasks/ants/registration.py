@@ -530,21 +530,21 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class OutputSpec(ShellOutSpec):
-        affine_transform: str = field(
+        affine_transform: File = field(
             metadata={
                 "help_string": "affine transform",
                 "output_file_template": "{output_transform_prefix}0GenericAffine.mat",
             }
         )
 
-        forward_warp_field: str = field(
+        forward_warp_field: File = field(
             metadata={
                 "help_string": "forward warp field",
                 "output_file_template": "{output_transform_prefix}1Warp.nii.gz",
             }
         )
 
-        inverse_warp_field: str = field(
+        inverse_warp_field: File = field(
             metadata={
                 "help_string": "inverse warp field",
                 "output_file_template": "{output_transform_prefix}1InverseWarp.nii.gz",
