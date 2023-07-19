@@ -7,7 +7,7 @@ Examples
 
 >>> task = registration_syn_quick(fixed_image="reference.nii", moving_image="structural.nii")
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration -o [output, .../reference_warped.nii, .../structural_warped.nii] ...'
+'antsRegistration -o [output, outputWarped.nii.gz, outputInverseWarped.nii.gz] ...'
 
 >>> task = registration_syn_quick(
 ...     fixed_image="reference.nii",
