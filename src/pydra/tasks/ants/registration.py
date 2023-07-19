@@ -385,10 +385,10 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "SyN transform",
                 "allowed_values": {"GaussianDisplacementField", "SyN", "BSplineSyN"},
-                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_flow_spline_distance, syn_total_spline_distance, syn_spline_order: (
+                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_spline_distance, syn_spline_order: (
                     "-t {}[{}]".format(
                         syn_transform,
-                        f"{syn_gradient_step}, {syn_flow_spline_distance}, {syn_total_spline_distance}, {syn_spline_order}"
+                        f"{syn_gradient_step}, {syn_spline_distance}, 0, {syn_spline_order}"
                         if syn_transform == "BSplineSyn"
                         else f"{syn_gradient_step}, {syn_flow_sigma}, {syn_total_sigma}",
                     )
@@ -404,13 +404,7 @@ class Registration(ShellCommandTask):
 
         syn_total_sigma: float = field(default=0, metadata={"help_string": "sigma for total field in SyN stage"})
 
-        syn_flow_spline_distance: int = field(
-            default=26, metadata={"help_string": "spline distance for flow field in SyN stage"}
-        )
-
-        syn_total_spline_distance: int = field(
-            default=0, metadata={"help_string": "spline distance for total field in SyN stage"}
-        )
+        syn_spline_distance: int = field(default=26, metadata={"help_string": "spline distance for SyN stage"})
 
         syn_spline_order: int = field(default=3, metadata={"help_string": "spline order for SyN stage"})
 
@@ -675,7 +669,7 @@ def registration_syn(
         enable_syn_stage=transform_type[0] in {"b", "s"},
         syn_transform="BSplineSyn" if transform_type[0] == "b" else "Syn",
         syn_gradient_step=gradient_step,
-        syn_flow_spline_distance=spline_distance,
+        syn_spline_distance=spline_distance,
         syn_metric="CC" if use_reproducible_mode else "MI",
         syn_radius=radius,
         syn_num_bins=num_bins,
