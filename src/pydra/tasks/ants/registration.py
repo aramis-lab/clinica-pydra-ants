@@ -92,7 +92,7 @@ class Registration(ShellCommandTask):
         )
 
         initialize_transforms_per_stage: bool = field(
-            default=True,
+            default=False,
             metadata={
                 "help_string": "initialize linear transforms from the previous stage",
                 "formatter": lambda initialize_transforms_per_stage: f"-i {initialize_transforms_per_stage:d}",
