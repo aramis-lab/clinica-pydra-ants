@@ -564,7 +564,9 @@ def registration_syn(
     fixed_image: PathLike,
     moving_image: PathLike,
     is_large_image: bool = True,
-    output_prefix: str = "output",
+    output_transform_prefix: str = "output",
+    warped_fixed_image: Optional[PathLike] = None,
+    warped_moving_image: Optional[PathLike] = None,
     transform_type: str = "s",
     num_bins: int = 32,
     gradient_step: float = 0.1,
@@ -594,8 +596,12 @@ def registration_syn(
     is_large_image : bool, default=True
         Whether registration is performed on images considered "large".
         ANTs considers input images to be large if any dimension is over 256.
-    output_prefix : str, default="output"
+    output_transform_prefix : str, default="output"
         Output prefix prepended to all transformation files.
+    warped_fixed_image : path_like, optional
+        Where to save the output warped fixed image.
+    warped_moving_image : path_like, optional
+        Where to save the output warped moving image.
     transform_type : {"t", "r", "a", "s", "sr", "so", "b", "br", "bo"}, default="s"
         Type of transform for the registration:
         * t: Translation only
@@ -643,7 +649,9 @@ def registration_syn(
     return Registration(
         fixed_image=fixed_image,
         moving_image=moving_image,
-        output_transform_prefix=output_prefix,
+        output_transform_prefix=output_transform_prefix,
+        warped_fixed_image=warped_fixed_image or NOTHING,
+        warped_moving_image=warped_moving_image or NOTHING,
         collapse_output_transforms=True,
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
