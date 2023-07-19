@@ -570,7 +570,7 @@ def registration_syn(
     moving_mask: Optional[PathLike] = None,
     precision: str = "double",
     use_histogram_matching: bool = False,
-    use_reproducible_mode: bool = False,
+    reproducible: bool = False,
     random_seed: Optional[int] = None,
     verbose: bool = False,
     quick: bool = False,
@@ -619,15 +619,16 @@ def registration_syn(
         Precision used for internal computation.
     use_histogram_matching : bool, default=True
         Perform histogram matching prior to registration.
-    use_reproducible_mode : bool, default=False
+    reproducible : bool, default=False
         Use a reproducible set of parameters,
-        i.e. GC metric for linear stages and CC for SyN.
+        i.e. `GC` metric for linear stages and `CC` for SyN.
+        Random seed should be specified or else a fixed value of 1 is used.
     random_seed : int, optional
         Specify a custom random seed for reproducibility.
     verbose : bool, default=False
         Enable verbose logging.
     quick : bool, default=False
-        Use quick parameters for convergence.
+        Use a set parameters for faster convergence.
     **kwargs : dict, optional
         Extra arguments passed to the task constructor.
 
@@ -652,7 +653,7 @@ def registration_syn(
         moving_mask=moving_mask or NOTHING,
         enable_rigid_stage=transform_type not in {"bo", "so"},
         rigid_transform="Translation" if transform_type == "t" else "Rigid",
-        rigid_metric="GC" if use_reproducible_mode else "MI",
+        rigid_metric="GC" if reproducible else "MI",
         rigid_radius=1,
         rigid_num_bins=32,
         rigid_convergence=(1000, 500, 250, 0 if quick else 100),
@@ -660,7 +661,7 @@ def registration_syn(
         rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
         enable_affine_stage=transform_type in {"a", "b", "s"},
         affine_transform="Affine",
-        affine_metric="GC" if use_reproducible_mode else "MI",
+        affine_metric="GC" if reproducible else "MI",
         affine_radius=1,
         affine_num_bins=32,
         affine_convergence=(1000, 500, 250, 0 if quick else 100),
@@ -670,7 +671,7 @@ def registration_syn(
         syn_transform="BSplineSyn" if transform_type[0] == "b" else "Syn",
         syn_gradient_step=gradient_step,
         syn_spline_distance=spline_distance,
-        syn_metric="CC" if use_reproducible_mode else "MI",
+        syn_metric="CC" if reproducible else "MI",
         syn_radius=radius,
         syn_num_bins=num_bins,
         syn_convergence=(
@@ -680,7 +681,7 @@ def registration_syn(
         syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
         precision=precision,
-        random_seed=random_seed or (1 if use_reproducible_mode else NOTHING),
+        random_seed=random_seed or (1 if reproducible else NOTHING),
         verbose=verbose,
         **kwargs,
     )
