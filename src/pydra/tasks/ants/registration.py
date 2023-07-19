@@ -637,6 +637,11 @@ def registration_syn(
     **kwargs : dict, optional
         Extra arguments passed to the task constructor.
 
+    Returns
+    -------
+    Registration
+        The configured registration task.
+
     See Also
     --------
     pydra.tasks.ants.registration.registration_syn_quick :
