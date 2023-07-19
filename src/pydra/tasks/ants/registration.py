@@ -53,23 +53,25 @@ class Registration(ShellCommandTask):
             default="output",
             metadata={
                 "help_string": "output transform prefix",
-                "formatter": lambda output_transform_prefix, warped_fixed_image, warped_moving_image: (
-                    f"-o [{output_transform_prefix}, {warped_fixed_image}, {warped_moving_image}]"
+                "formatter": lambda output_transform_prefix, warped_moving_image, warped_fixed_image: (
+                    f"-o {output_transform_prefix}"
+                    if not all([warped_moving_image, warped_fixed_image])
+                    else f"-o [{output_transform_prefix}, {warped_moving_image}, {warped_fixed_image}]"
                 ),
             },
-        )
-
-        warped_fixed_image: str = field(
-            metadata={
-                "help_string": "warped fixed image to moving image space",
-                "output_file_template": "{fixed_image}_warped",
-            }
         )
 
         warped_moving_image: str = field(
             metadata={
                 "help_string": "warped moving image to fixed image space",
                 "output_file_template": "{moving_image}_warped",
+            }
+        )
+
+        warped_fixed_image: str = field(
+            metadata={
+                "help_string": "warped fixed image to moving image space",
+                "output_file_template": "{fixed_image}_warped",
             }
         )
 
