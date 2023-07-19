@@ -572,24 +572,83 @@ def registration_syn(
     transform_type: str = "s",
     num_bins: int = 32,
     gradient_step: float = 0.1,
-    spline_distance: int = 26,
     radius: int = 4,
+    spline_distance: int = 26,
     fixed_mask: Optional[PathLike] = None,
     moving_mask: Optional[PathLike] = None,
     precision: str = "double",
     use_histogram_matching: bool = False,
     use_reproducible_mode: bool = False,
-    collapse_output_transforms: bool = True,
     random_seed: Optional[int] = None,
     verbose: bool = False,
     quick: bool = False,
     **kwargs,
 ) -> Registration:
+    """Returns a task for SyN registration.
+
+    This function instantiates a SyN registration task with parameters mimicking the `antsRegistrationSyn` scripts
+    provided by ANTs.
+
+    Parameters
+    ----------
+    fixed_image : path_like
+        Fixed image, also referred to as source image.
+    moving_image : path_like
+        Moving image, also referred to as target image.
+    is_large_image : bool, default=True
+        Whether registration is performed on images considered "large".
+        ANTs considers input images to be large if any dimension is over 256.
+    output_prefix : str, default="output"
+        Output prefix prepended to all transformation files.
+    transform_type : {"t", "r", "a", "s", "sr", "so", "b", "br", "bo"}, default="s"
+        Type of transform for the registration:
+        * t: Translation only
+        * r: Rigid only
+        * a: Rigid + Affine
+        * s: Rigid + Affine + SyN
+        * sr: Rigid + SyN
+        * so: SyN only
+        * b: Rigid + Affine + BSplineSyn
+        * br: Rigid + BSplineSyn
+        * bo: BSplineSyn only
+    num_bins : int, default=32
+        Number of histogram bins for the MI metric in SyN stage.
+    gradient_step : float, default=0.1
+        Gradient step size for the CC metric in SyN stage.
+    radius : int, default=4
+        Radius for the CC metric used in SyN stage.
+    spline_distance : int, default=26
+        Spline distance for deformable B-splines in SyN stage.
+    fixed_mask : path_like, optional
+        Mask applied to the fixed image space.
+    moving_mask : path_like, optional
+        Mask applied to the moving image space.
+    precision : {"float", "double"}, default="double"
+        Precision used for internal computation.
+    use_histogram_matching : bool, default=True
+        Perform histogram matching prior to registration.
+    use_reproducible_mode : bool, default=False
+        Use a reproducible set of parameters,
+        i.e. GC metric for linear stages and CC for SyN.
+    random_seed : int, optional
+        Specify a custom random seed for reproducibility.
+    verbose : bool, default=False
+        Enable verbose logging.
+    quick : bool, default=False
+        Use quick parameters for convergence.
+    **kwargs : dict, optional
+        Extra arguments passed to the task constructor.
+
+    See Also
+    --------
+    pydra.tasks.ants.registration.registration_syn_quick :
+        Same as `registration_syn` with `quick` enabled.
+    """
     return Registration(
         fixed_image=fixed_image,
         moving_image=moving_image,
         output_transform_prefix=output_prefix,
-        collapse_output_transforms=collapse_output_transforms,
+        collapse_output_transforms=True,
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
         enable_rigid_stage=transform_type not in {"bo", "so"},
