@@ -5,11 +5,16 @@ Registration
 Examples
 --------
 
->>> task = registration_syn_quick(fixed_image="reference.nii", moving_image="structural.nii")
+>>> task = registration_syn_quick(
+...     dimensionality=3,
+...     fixed_image="reference.nii",
+...     moving_image="structural.nii",
+... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration -o [output, outputWarped.nii.gz, outputInverseWarped.nii.gz] ...'
+'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] ...'
 
 >>> task = registration_syn_quick(
+...     dimensionality=3,
 ...     fixed_image="reference.nii",
 ...     moving_image="structural.nii", 
 ...     transform_type="b",
@@ -17,16 +22,17 @@ Examples
 ...     spline_distance=32,
 ... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration ... -t BSplineSyn[0.2, 32, 0, 3] ...'
+'antsRegistration ... -t BSplineSyn[0.2,32,0,3] ...'
 
 >>> task = registration_syn_quick(
+...     dimensionality=3,
 ...     fixed_image="reference.nii",
 ...     moving_image="structural.nii",
 ...     fixed_mask="mask.nii",
 ...     random_seed=42,
 ... )
 >>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration ... -x [mask.nii, NULL] ... --random-seed 42 ...'
+'antsRegistration ... -x [mask.nii,NULL] ... --random-seed 42 ...'
 """
 
 __all__ = ["Registration", "registration_syn", "registration_syn_quick"]
