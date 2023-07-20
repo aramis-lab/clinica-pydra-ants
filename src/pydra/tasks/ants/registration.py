@@ -85,14 +85,6 @@ class Registration(ShellCommandTask):
             }
         )
 
-        write_composite_transform: bool = field(
-            default=False,
-            metadata={
-                "help_string": "write composite transform",
-                "formatter": lambda write_composite_transform: f"-a {write_composite_transform:d}",
-            },
-        )
-
         initialize_transforms_per_stage: bool = field(
             default=False,
             metadata={
