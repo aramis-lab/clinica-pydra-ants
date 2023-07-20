@@ -93,14 +93,6 @@ class Registration(ShellCommandTask):
             },
         )
 
-        collapse_output_transforms: bool = field(
-            default=True,
-            metadata={
-                "help_string": "collapse output transforms",
-                "formatter": lambda collapse_output_transforms: f"-z {collapse_output_transforms:d}",
-            },
-        )
-
         initialize_transforms_per_stage: bool = field(
             default=False,
             metadata={
@@ -662,7 +654,6 @@ def registration_syn(
         output_transform_prefix=output_prefix,
         warped_moving_image=f"{output_prefix}Warped.nii.gz",
         warped_fixed_image=f"{output_prefix}InverseWarped.nii.gz",
-        collapse_output_transforms=True,
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
         enable_rigid_stage=transform_type not in {"bo", "so"},
