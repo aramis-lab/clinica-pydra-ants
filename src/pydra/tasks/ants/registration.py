@@ -45,6 +45,10 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class InputSpec(ShellSpec):
+        dimensionality: int = field(
+            default=3, metadata={"help_string": "image dimensionality", "argstr": "-d", "allowed_values": {2, 3, 4}}
+        )
+
         fixed_image: PathLike = field(metadata={"help_string": "fixed image", "mandatory": True})
 
         moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True})
@@ -56,7 +60,7 @@ class Registration(ShellCommandTask):
                 "formatter": lambda output_transform_prefix, warped_moving_image, warped_fixed_image: (
                     f"-o {output_transform_prefix}"
                     if not all([warped_moving_image, warped_fixed_image])
-                    else f"-o [{output_transform_prefix}, {warped_moving_image}, {warped_fixed_image}]"
+                    else f"-o [{output_transform_prefix},{warped_moving_image},{warped_fixed_image}]"
                 ),
             },
         )
@@ -116,7 +120,7 @@ class Registration(ShellCommandTask):
                 "formatter": lambda interpolation, sigma, alpha, order: (
                     "-n {}{}".format(
                         interpolation,
-                        f"[{sigma}, {alpha}]"
+                        f"[{sigma},{alpha}]"
                         if interpolation == "Gaussian"
                         else f"[{order}]"
                         if interpolation == "BSpline"
@@ -137,7 +141,7 @@ class Registration(ShellCommandTask):
                 "help_string": "masks parameter",
                 "readonly": True,
                 "formatter": lambda fixed_mask, moving_mask: (
-                    f"-x [{fixed_mask or 'NULL'}, {moving_mask or 'NULL'}]" if any([fixed_mask, moving_mask]) else ""
+                    f"-x [{fixed_mask or 'NULL'},{moving_mask or 'NULL'}]" if any([fixed_mask, moving_mask]) else ""
                 ),
             }
         )
@@ -154,7 +158,7 @@ class Registration(ShellCommandTask):
                     if not initial_fixed_transforms
                     else " ".join(f"-q {x}" for x in initial_fixed_transforms)
                     if not invert_fixed_transforms
-                    else " ".join(f"-q [{x}, {y:d}]" for x, y in zip(initial_fixed_transforms, invert_fixed_transforms))
+                    else " ".join(f"-q [{x},{y:d}]" for x, y in zip(initial_fixed_transforms, invert_fixed_transforms))
                 ),
             }
         )
@@ -175,7 +179,7 @@ class Registration(ShellCommandTask):
                     else " ".join(f"-r {x}" for x in initial_moving_transforms)
                     if not invert_moving_transforms
                     else " ".join(
-                        f"-r [{x}, {y:d}]" for x, y in zip(initial_moving_transforms, invert_moving_transforms)
+                        f"-r [{x},{y:d}]" for x, y in zip(initial_moving_transforms, invert_moving_transforms)
                     )
                 ),
             }
@@ -208,7 +212,7 @@ class Registration(ShellCommandTask):
                 "help_string": "rigid metric parameter",
                 "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
                 "formatter": lambda enable_rigid_stage, rigid_metric, fixed_image, moving_image, rigid_radius, rigid_num_bins, rigid_sampling_strategy, rigid_sampling_rate: (
-                    "-m {}[{}, {}, 1, {}, {}, {}]".format(
+                    "-m {}[{},{},1,{},{},{}]".format(
                         rigid_metric,
                         fixed_image,
                         moving_image,
@@ -241,7 +245,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "convergence for rigid stage",
                 "formatter": lambda enable_rigid_stage, rigid_convergence, rigid_threshold, rigid_window_size: (
-                    "-c [{}, {}, {}]".format(
+                    "-c [{},{},{}]".format(
                         "x".join(str(c) for c in rigid_convergence), rigid_threshold, rigid_window_size
                     )
                     if enable_rigid_stage
@@ -301,7 +305,7 @@ class Registration(ShellCommandTask):
                 "help_string": "metric parameter for affine stage",
                 "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
                 "formatter": lambda enable_affine_stage, affine_metric, fixed_image, moving_image, affine_radius, affine_num_bins, affine_sampling_strategy, affine_sampling_rate: (
-                    "-m {}[{}, {}, 1, {}, {}, {}]".format(
+                    "-m {}[{},{},1,{},{},{}]".format(
                         affine_metric,
                         fixed_image,
                         moving_image,
@@ -334,7 +338,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "convergence for affine stage",
                 "formatter": lambda enable_affine_stage, affine_convergence, affine_threshold, affine_window_size: (
-                    "-c [{}, {}, {}]".format(
+                    "-c [{},{},{}]".format(
                         "x".join(str(c) for c in affine_convergence), affine_threshold, affine_window_size
                     )
                     if enable_affine_stage
@@ -388,9 +392,9 @@ class Registration(ShellCommandTask):
                 "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_spline_distance, syn_spline_order: (
                     "-t {}[{}]".format(
                         syn_transform,
-                        f"{syn_gradient_step}, {syn_spline_distance}, 0, {syn_spline_order}"
+                        f"{syn_gradient_step},{syn_spline_distance},0,{syn_spline_order}"
                         if syn_transform == "BSplineSyn"
-                        else f"{syn_gradient_step}, {syn_flow_sigma}, {syn_total_sigma}",
+                        else f"{syn_gradient_step},{syn_flow_sigma},{syn_total_sigma}",
                     )
                     if enable_syn_stage
                     else ""
@@ -414,7 +418,7 @@ class Registration(ShellCommandTask):
                 "help_string": "metric for SyN stage",
                 "allowed_values": {"CC", "MI", "Mattes", "MeanSquares", "Demons", "GC"},
                 "formatter": lambda enable_syn_stage, syn_metric, fixed_image, moving_image, syn_radius, syn_num_bins, syn_sampling_strategy, syn_sampling_rate: (
-                    "-m {}[{}, {}, 1, {}, {}, {}]".format(
+                    "-m {}[{},{},1,{},{},{}]".format(
                         syn_metric,
                         fixed_image,
                         moving_image,
@@ -447,7 +451,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "convergence for SyN stage",
                 "formatter": lambda enable_syn_stage, syn_convergence, syn_threshold, syn_window_size: (
-                    "-c [{}, {}, {}]".format("x".join(str(c) for c in syn_convergence), syn_threshold, syn_window_size)
+                    "-c [{},{},{}]".format("x".join(str(c) for c in syn_convergence), syn_threshold, syn_window_size)
                     if enable_syn_stage
                     else ""
                 ),
@@ -498,7 +502,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "winsorize image intensities",
                 "formatter": lambda winsorize_image_intensities, lower_quantile, upper_quantile: (
-                    f"-w [{lower_quantile}, {upper_quantile}]" if winsorize_image_intensities else ""
+                    f"-w [{lower_quantile},{upper_quantile}]" if winsorize_image_intensities else ""
                 ),
             },
         )
@@ -557,6 +561,7 @@ class Registration(ShellCommandTask):
 
 
 def registration_syn(
+    dimensionality: int,
     fixed_image: PathLike,
     moving_image: PathLike,
     is_large_image: bool = True,
@@ -583,6 +588,8 @@ def registration_syn(
 
     Parameters
     ----------
+    dimensionality : {2, 3, 4}
+        Image dimensionality.
     fixed_image : path_like
         Fixed image, also referred to as source image.
     moving_image : path_like
@@ -643,6 +650,7 @@ def registration_syn(
         Same as `registration_syn` with `quick` enabled.
     """
     return Registration(
+        dimensionality=dimensionality,
         fixed_image=fixed_image,
         moving_image=moving_image,
         output_transform_prefix=output_prefix,
