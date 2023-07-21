@@ -531,7 +531,7 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class OutputSpec(ShellOutSpec):
-        affine_transform: File = field(
+        transform_file: File = field(
             metadata={
                 "help_string": "affine transform",
                 "callable": lambda output_transform_prefix, use_minc_format: (
