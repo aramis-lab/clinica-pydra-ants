@@ -501,12 +501,11 @@ class Registration(ShellCommandTask):
             metadata={"help_string": "smoothing units for SyN stage", "allowed_values": {"vox", "mm"}},
         )
 
-        precision: str = field(
-            default="double",
+        use_float_precision: bool = field(
+            default=False,
             metadata={
-                "help_string": "use float or double precision for internal computation",
-                "allowed_values": {"float", "double"},
-                "formatter": lambda precision: "--float {:d}".format(precision == "float"),
+                "help_string": "use float precision instead of double",
+                "formatter": lambda use_float_precision: f"--float {use_float_precision:d}",
             },
         )
 
@@ -573,7 +572,7 @@ def registration_syn(
     spline_distance: int = 26,
     fixed_mask: Optional[PathLike] = None,
     moving_mask: Optional[PathLike] = None,
-    precision: str = "double",
+    use_float_precision: bool = False,
     use_histogram_matching: bool = False,
     reproducible: bool = False,
     random_seed: Optional[int] = None,
@@ -622,8 +621,8 @@ def registration_syn(
         Mask applied to the fixed image space.
     moving_mask : path_like, optional
         Mask applied to the moving image space.
-    precision : {"float", "double"}, default="double"
-        Precision used for internal computation.
+    use_float_precision : bool, default=False
+        Use float precision for computation instead of double.
     use_histogram_matching : bool, default=True
         Perform histogram matching prior to registration.
     reproducible : bool, default=False
@@ -710,7 +709,7 @@ def registration_syn(
         syn_shrink_factors=(10, 6, 4, 2, 1) if is_large_image else (8, 4, 2, 1),
         syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
-        precision=precision,
+        use_float_precision=use_float_precision,
         random_seed=random_seed or (1 if reproducible else NOTHING),
         verbose=verbose,
         **kwargs,
