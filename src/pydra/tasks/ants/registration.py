@@ -164,7 +164,7 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "initialize composite moving transform with these transforms",
                 "formatter": lambda initial_moving_transforms, invert_moving_transforms, fixed_image, moving_image: (
-                    f"-r [{fixed_image}, {moving_image}, 1]"
+                    f"-r [{fixed_image},{moving_image},1]"
                     if not initial_moving_transforms
                     else " ".join(f"-r {x}" for x in initial_moving_transforms)
                     if not invert_moving_transforms
@@ -221,14 +221,14 @@ class Registration(ShellCommandTask):
         rigid_num_bins: int = field(default=32, metadata={"help_string": "number of bins for rigid stage"})
 
         rigid_sampling_strategy: str = field(
-            default="Regular",
+            default="None",
             metadata={
                 "help_string": "sampling strategy for rigid stage",
                 "allowed_values": {"None", "Regular", "Random"},
             },
         )
 
-        rigid_sampling_rate: float = field(default=0.25, metadata={"help_string": "sampling rate for rigid stage"})
+        rigid_sampling_rate: float = field(default=1.0, metadata={"help_string": "sampling rate for rigid stage"})
 
         rigid_convergence: Sequence[int] = field(
             default=(1000, 500, 250, 0),
@@ -314,14 +314,14 @@ class Registration(ShellCommandTask):
         affine_num_bins: int = field(default=32, metadata={"help_string": "number of bins for affine stage"})
 
         affine_sampling_strategy: str = field(
-            default="Regular",
+            default="None",
             metadata={
                 "help_string": "sampling strategy for affine stage",
                 "allowed_values": {"None", "Regular", "Random"},
             },
         )
 
-        affine_sampling_rate: float = field(default=0.25, metadata={"help_string": "sampling rate for affine stage"})
+        affine_sampling_rate: float = field(default=1.0, metadata={"help_string": "sampling rate for affine stage"})
 
         affine_convergence: Sequence[int] = field(
             default=(1000, 500, 250, 0),
@@ -427,14 +427,14 @@ class Registration(ShellCommandTask):
         syn_num_bins: int = field(default=32, metadata={"help_string": "number of bins for SyN stage"})
 
         syn_sampling_strategy: str = field(
-            default="Regular",
+            default="None",
             metadata={
                 "help_string": "sampling strategy for SyN stage",
                 "allowed_values": {"None", "Regular", "Random"},
             },
         )
 
-        syn_sampling_rate: float = field(default=0.25, metadata={"help_string": "sampling rate for SyN stage"})
+        syn_sampling_rate: float = field(default=1.0, metadata={"help_string": "sampling rate for SyN stage"})
 
         syn_convergence: Sequence[int] = field(
             default=(100, 70, 50, 20),
@@ -638,6 +638,22 @@ def registration_syn(
     --------
     pydra.tasks.ants.registration.registration_syn_quick :
         Same as `registration_syn` with `quick` enabled.
+
+    Examples
+    --------
+    >>> task = registration_syn(
+    ...     dimensionality=3,
+    ...     fixed_image="reference.nii.gz",
+    ...     moving_image="structural.nii.gz",
+    ... )
+    >>> task.cmdline
+    'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear \
+-r [reference.nii.gz,structural.nii.gz,1] -t Rigid[0.1] \
+-m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] -c [1000x500x250x100,1e-06,10] -f 12x8x4x2 \
+-s 4x3x2x1vox -t Affine[0.1] -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] \
+-c [1000x500x250x100,1e-06,10] -f 12x8x4x2 -s 4x3x2x1vox -t Syn[0.1,3,0] \
+-m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x100x70x50x20,1e-06,10] -f 10x6x4x2x1 \
+-s 5x3x2x1x0vox -u 0 --float 0 --verbose 0'
     """
     return Registration(
         dimensionality=dimensionality,
@@ -653,6 +669,8 @@ def registration_syn(
         rigid_metric="GC" if reproducible else "MI",
         rigid_radius=1,
         rigid_num_bins=32,
+        rigid_sampling_strategy="Regular",
+        rigid_sampling_rate=0.25,
         rigid_convergence=(1000, 500, 250, 0 if quick else 100),
         rigid_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
@@ -661,6 +679,8 @@ def registration_syn(
         affine_metric="GC" if reproducible else "MI",
         affine_radius=1,
         affine_num_bins=32,
+        affine_sampling_strategy="Regular",
+        affine_sampling_rate=0.25,
         affine_convergence=(1000, 500, 250, 0 if quick else 100),
         affine_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         affine_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
