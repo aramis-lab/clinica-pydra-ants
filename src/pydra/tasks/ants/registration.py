@@ -510,6 +510,14 @@ class Registration(ShellCommandTask):
             },
         )
 
+        use_minc_format: bool = field(
+            default=False,
+            metadata={
+                "help_string": "save output transforms to MINC format",
+                "formatter": lambda use_minc_format: f"--minc {use_minc_format:d}",
+            },
+        )
+
         random_seed: int = field(metadata={"help_string": "random seed", "argstr": "--random-seed"})
 
         verbose: bool = field(
@@ -527,7 +535,9 @@ class Registration(ShellCommandTask):
         affine_transform: File = field(
             metadata={
                 "help_string": "affine transform",
-                "output_file_template": "{output_transform_prefix}0GenericAffine.mat",
+                "callable": lambda output_transform_prefix, use_minc_format: (
+                    "{}0GenericAffine.{}".format(output_transform_prefix, "xfm" if use_minc_format else "mat")
+                ),
             }
         )
 
@@ -647,13 +657,13 @@ def registration_syn(
     ...     moving_image="structural.nii.gz",
     ... )
     >>> task.cmdline
-    'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear -u 0 \
--r [reference.nii.gz,structural.nii.gz,1] -t Rigid[0.1] \
+    'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear \
+-u 0 -w [0.005,0.995] -r [reference.nii.gz,structural.nii.gz,1] -t Rigid[0.1] \
 -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 \
 -s 3x2x1x0vox -t Affine[0.1] -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] \
 -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 -s 3x2x1x0vox -t Syn[0.1,3,0] \
 -m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x70x50x20,1e-06,10] -f 8x4x2x1 \
--s 3x2x1x0vox --float 0 --verbose 0'
+-s 3x2x1x0vox --float 0 --minc 0 --verbose 0'
     """
     return Registration(
         dimensionality=dimensionality,
