@@ -554,7 +554,7 @@ def registration_syn(
     dimensionality: int,
     fixed_image: PathLike,
     moving_image: PathLike,
-    is_large_image: bool = True,
+    is_large_image: bool = False,
     output_prefix: str = "output",
     transform_type: str = "s",
     num_bins: int = 32,
@@ -584,7 +584,7 @@ def registration_syn(
         Fixed image, also referred to as source image.
     moving_image : path_like
         Moving image, also referred to as target image.
-    is_large_image : bool, default=True
+    is_large_image : bool, default=False
         Whether registration is performed on images considered "large".
         ANTs considers input images to be large if any dimension is over 256.
     output_prefix : str, default="output"
@@ -649,11 +649,11 @@ def registration_syn(
     >>> task.cmdline
     'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear \
 -r [reference.nii.gz,structural.nii.gz,1] -t Rigid[0.1] \
--m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] -c [1000x500x250x100,1e-06,10] -f 12x8x4x2 \
--s 4x3x2x1vox -t Affine[0.1] -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] \
--c [1000x500x250x100,1e-06,10] -f 12x8x4x2 -s 4x3x2x1vox -t Syn[0.1,3,0] \
--m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x100x70x50x20,1e-06,10] -f 10x6x4x2x1 \
--s 5x3x2x1x0vox -u 0 --float 0 --verbose 0'
+-m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 \
+-s 3x2x1x0vox -t Affine[0.1] -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] \
+-c [1000x500x250x100,1e-06,10] -f 8x4x2x1 -s 3x2x1x0vox -t Syn[0.1,3,0] \
+-m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x70x50x20,1e-06,10] -f 8x4x2x1 \
+-s 3x2x1x0vox -u 0 --float 0 --verbose 0'
     """
     return Registration(
         dimensionality=dimensionality,
