@@ -573,6 +573,7 @@ def registration_syn(
     fixed_mask: Optional[PathLike] = None,
     moving_mask: Optional[PathLike] = None,
     use_float_precision: bool = False,
+    use_minc_format: bool = False,
     use_histogram_matching: bool = False,
     reproducible: bool = False,
     random_seed: Optional[int] = None,
@@ -623,6 +624,8 @@ def registration_syn(
         Mask applied to the moving image space.
     use_float_precision : bool, default=False
         Use float precision for computation instead of double.
+    use_minc_format: bool, default=False
+        Save output transforms to MINC format.
     use_histogram_matching : bool, default=True
         Perform histogram matching prior to registration.
     reproducible : bool, default=False
@@ -710,6 +713,7 @@ def registration_syn(
         syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
         use_float_precision=use_float_precision,
+        use_minc_format=use_minc_format,
         random_seed=random_seed or (1 if reproducible else NOTHING),
         verbose=verbose,
         **kwargs,
