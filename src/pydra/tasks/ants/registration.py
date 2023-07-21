@@ -140,6 +140,28 @@ class Registration(ShellCommandTask):
 
         moving_mask: PathLike = field(metadata={"help_string": "mask applied to the moving image"})
 
+        use_histogram_matching: bool = field(
+            default=False,
+            metadata={
+                "help_string": "use histogram matching",
+                "formatter": lambda use_histogram_matching: f"-u {use_histogram_matching:d}",
+            },
+        )
+
+        winsorize_image_intensities: bool = field(
+            default=False,
+            metadata={
+                "help_string": "winsorize image intensities",
+                "formatter": lambda winsorize_image_intensities, lower_quantile, upper_quantile: (
+                    f"-w [{lower_quantile},{upper_quantile}]" if winsorize_image_intensities else ""
+                ),
+            },
+        )
+
+        lower_quantile: float = field(default=0.0, metadata={"help_string": "lower quantile"})
+
+        upper_quantile: float = field(default=1.0, metadata={"help_string": "upper quantile"})
+
         initial_fixed_transforms: Sequence[PathLike] = field(
             metadata={
                 "help_string": "initialize composite fixed transform with these transforms",
@@ -479,28 +501,6 @@ class Registration(ShellCommandTask):
             metadata={"help_string": "smoothing units for SyN stage", "allowed_values": {"vox", "mm"}},
         )
 
-        use_histogram_matching: bool = field(
-            default=False,
-            metadata={
-                "help_string": "use histogram matching",
-                "formatter": lambda use_histogram_matching: f"-u {use_histogram_matching:d}",
-            },
-        )
-
-        winsorize_image_intensities: bool = field(
-            default=False,
-            metadata={
-                "help_string": "winsorize image intensities",
-                "formatter": lambda winsorize_image_intensities, lower_quantile, upper_quantile: (
-                    f"-w [{lower_quantile},{upper_quantile}]" if winsorize_image_intensities else ""
-                ),
-            },
-        )
-
-        lower_quantile: float = field(default=0.005, metadata={"help_string": "lower quantile"})
-
-        upper_quantile: float = field(default=0.995, metadata={"help_string": "upper quantile"})
-
         precision: str = field(
             default="double",
             metadata={
@@ -647,13 +647,13 @@ def registration_syn(
     ...     moving_image="structural.nii.gz",
     ... )
     >>> task.cmdline
-    'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear \
+    'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] -i 0 -n Linear -u 0 \
 -r [reference.nii.gz,structural.nii.gz,1] -t Rigid[0.1] \
 -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 \
 -s 3x2x1x0vox -t Affine[0.1] -m MI[reference.nii.gz,structural.nii.gz,1,32,Regular,0.25] \
 -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 -s 3x2x1x0vox -t Syn[0.1,3,0] \
 -m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x70x50x20,1e-06,10] -f 8x4x2x1 \
--s 3x2x1x0vox -u 0 --float 0 --verbose 0'
+-s 3x2x1x0vox --float 0 --verbose 0'
     """
     return Registration(
         dimensionality=dimensionality,
