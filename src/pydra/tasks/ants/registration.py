@@ -39,6 +39,7 @@ __all__ = ["Registration", "registration_syn", "registration_syn_quick"]
 
 from functools import partial
 from os import PathLike
+from pathlib import Path
 from typing import Optional, Sequence
 
 from attrs import NOTHING, define, field
@@ -93,10 +94,27 @@ class Registration(ShellCommandTask):
             },
         )
 
-        interpolation: str = field(
+        interpolation_: str = field(
+            metadata={
+                "help_string": "interpolation parameter",
+                "readonly": True,
+                "formatter": lambda interpolator, sigma, alpha, order: (
+                    "-n {}[{}]".format(
+                        interpolator,
+                        f"{sigma},{alpha}"
+                        if interpolator == "Gaussian"
+                        else f"{order}"
+                        if interpolator == "BSpline"
+                        else "",
+                    )
+                ),
+            }
+        )
+
+        interpolator: str = field(
             default="Linear",
             metadata={
-                "help_string": "type of interpolation",
+                "help_string": "choice of interpolator",
                 "allowed_values": {
                     "Linear",
                     "NearestNeighbor",
@@ -107,16 +125,6 @@ class Registration(ShellCommandTask):
                     "HammingWindowedSinc",
                     "LanczosWindowedSinc",
                 },
-                "formatter": lambda interpolation, sigma, alpha, order: (
-                    "-n {}{}".format(
-                        interpolation,
-                        f"[{sigma},{alpha}]"
-                        if interpolation == "Gaussian"
-                        else f"[{order}]"
-                        if interpolation == "BSpline"
-                        else "",
-                    )
-                ),
             },
         )
 
