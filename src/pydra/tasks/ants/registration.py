@@ -716,9 +716,7 @@ def registration_syn(
         syn_metric="CC" if reproducible else "MI",
         syn_radius=radius,
         syn_num_bins=num_bins,
-        syn_convergence=(
-            (100, 100, 70, 50, 0 if quick else 20) if large else (100, 70, 50, 0 if quick else 20)
-        ),
+        syn_convergence=((100, 100, 70, 50, 0 if quick else 20) if large else (100, 70, 50, 0 if quick else 20)),
         syn_shrink_factors=(10, 6, 4, 2, 1) if large else (8, 4, 2, 1),
         syn_smoothing_sigmas=(5, 3, 2, 1, 0) if large else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
