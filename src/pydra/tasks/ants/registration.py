@@ -543,11 +543,13 @@ class Registration(ShellCommandTask):
 
     @define(kw_only=True)
     class OutputSpec(ShellOutSpec):
-        transform_file: File = field(
+        affine_transform: File = field(
             metadata={
                 "help_string": "affine transform",
                 "callable": lambda output_transform_prefix, use_minc_format: (
-                    "{}0GenericAffine.{}".format(output_transform_prefix, "xfm" if use_minc_format else "mat")
+                    Path.cwd() / "{}0GenericAffine{}".format(
+                        output_transform_prefix, ".xfm" if use_minc_format else ".mat"
+                    )
                 ),
             }
         )
