@@ -1,38 +1,6 @@
 """
 Registration
 ============
-
-Examples
---------
-
->>> task = registration_syn_quick(
-...     dimensionality=3,
-...     fixed_image="reference.nii",
-...     moving_image="structural.nii",
-... )
->>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration -d 3 -o [output,outputWarped.nii.gz,outputInverseWarped.nii.gz] ...'
-
->>> task = registration_syn_quick(
-...     dimensionality=3,
-...     fixed_image="reference.nii",
-...     moving_image="structural.nii", 
-...     transform_type="b",
-...     gradient_step=0.2,
-...     spline_distance=32,
-... )
->>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration ... -t BSplineSyn[0.2,32,0,3] ...'
-
->>> task = registration_syn_quick(
-...     dimensionality=3,
-...     fixed_image="reference.nii",
-...     moving_image="structural.nii",
-...     fixed_mask="mask.nii",
-...     random_seed=42,
-... )
->>> task.cmdline    # doctest: +ELLIPSIS
-'antsRegistration ... -x [mask.nii,NULL] ... --random-seed 42 ...'
 """
 
 __all__ = ["Registration", "registration_syn", "registration_syn_quick"]
@@ -547,9 +515,8 @@ class Registration(ShellCommandTask):
             metadata={
                 "help_string": "affine transform",
                 "callable": lambda output_transform_prefix, use_minc_format: (
-                    Path.cwd() / "{}0GenericAffine{}".format(
-                        output_transform_prefix, ".xfm" if use_minc_format else ".mat"
-                    )
+                    Path.cwd()
+                    / "{}0GenericAffine{}".format(output_transform_prefix, ".xfm" if use_minc_format else ".mat")
                 ),
             }
         )
@@ -680,6 +647,35 @@ def registration_syn(
 -c [1000x500x250x100,1e-06,10] -f 8x4x2x1 -s 3x2x1x0vox -t Syn[0.1,3,0] \
 -m MI[reference.nii.gz,structural.nii.gz,1,32,None,1.0] -c [100x70x50x20,1e-06,10] -f 8x4x2x1 \
 -s 3x2x1x0vox --float 0 --minc 0 --verbose 0'
+
+    >>> task = registration_syn(
+    ...     dimensionality=3,
+    ...     fixed_image="reference.nii.gz",
+    ...     moving_image="structural.nii.gz",
+    ...     is_large_image=True,
+    ... )
+    >>> task.cmdline    # doctest: +ELLIPSIS
+    'antsRegistration ... -c [1000x500x250x100,1e-06,10] -f 12x8x4x2 -s 4x3x2x1vox ... \
+-c [1000x500x250x100,1e-06,10] -f 12x8x4x2 -s 4x3x2x1vox ... \
+-c [100x100x70x50x20,1e-06,10] -f 10x6x4x2x1 -s 5x3x2x1x0vox ...'
+
+    >>> task = registration_syn(
+    ...     dimensionality=3,
+    ...     fixed_image="reference.nii.gz",
+    ...     moving_image="structural.nii.gz",
+    ...     reproducible=True,
+    ... )
+    >>> task.cmdline    # doctest: +ELLIPSIS
+    'antsRegistration ... -m GC[...] ... -m GC[...] ... -m CC[...] ...'
+
+    >>> task = registration_syn(
+    ...     dimensionality=3,
+    ...     fixed_image="reference.nii.gz",
+    ...     moving_image="structural.nii.gz",
+    ...     quick=True,
+    ... )
+    >>> task.cmdline    # doctest: +ELLIPSIS
+    'antsRegistration ... -c [1000x500x250x0,...] ... -c [1000x500x250x0,...] ... -c [100x70x50x0,...] ...'
     """
     return Registration(
         dimensionality=dimensionality,
