@@ -60,26 +60,30 @@ class Registration(ShellCommandTask):
 
         moving_image: PathLike = field(metadata={"help_string": "moving image", "mandatory": True})
 
-        output_transform_prefix: str = field(
-            default="output",
+        output_: str = field(
             metadata={
-                "help_string": "output transform prefix",
-                "formatter": lambda output_transform_prefix, warped_moving_image, warped_fixed_image: (
-                    f"-o {output_transform_prefix}"
-                    if not all([warped_moving_image, warped_fixed_image])
-                    else f"-o [{output_transform_prefix},{warped_moving_image},{warped_fixed_image}]"
+                "help_string": "output parameter",
+                "readonly": True,
+                "formatter": lambda output_transform_prefix, warped_image, inverse_warped_image: (
+                    "-o {}".format(
+                        f"[{output_transform_prefix},{warped_image},{inverse_warped_image}]"
+                        if all([warped_image, inverse_warped_image])
+                        else output_transform_prefix
+                    )
                 ),
-            },
+            }
         )
 
-        warped_moving_image: str = field(
+        output_transform_prefix: str = field(default="output", metadata={"help_string": "output transform prefix"})
+
+        warped_image: str = field(
             metadata={
                 "help_string": "warped moving image to fixed image space",
                 "output_file_template": "{moving_image}_warped",
             }
         )
 
-        warped_fixed_image: str = field(
+        inverse_warped_image: str = field(
             metadata={
                 "help_string": "warped fixed image to moving image space",
                 "output_file_template": "{fixed_image}_warped",
@@ -548,16 +552,16 @@ class Registration(ShellCommandTask):
             }
         )
 
-        forward_warp_field: File = field(
+        warp_field: File = field(
             metadata={
-                "help_string": "forward warp field",
+                "help_string": "warp field from moving to fixed image space",
                 "output_file_template": "{output_transform_prefix}1Warp.nii.gz",
             }
         )
 
         inverse_warp_field: File = field(
             metadata={
-                "help_string": "inverse warp field",
+                "help_string": "warp field from fixed to moving image space",
                 "output_file_template": "{output_transform_prefix}1InverseWarp.nii.gz",
             }
         )
@@ -680,8 +684,8 @@ def registration_syn(
         fixed_image=fixed_image,
         moving_image=moving_image,
         output_transform_prefix=output_prefix,
-        warped_moving_image=f"{output_prefix}Warped.nii.gz",
-        warped_fixed_image=f"{output_prefix}InverseWarped.nii.gz",
+        warped_image=f"{output_prefix}Warped.nii.gz",
+        inverse_warped_image=f"{output_prefix}InverseWarped.nii.gz",
         fixed_mask=fixed_mask or NOTHING,
         moving_mask=moving_mask or NOTHING,
         winsorize_image_intensities=True,
