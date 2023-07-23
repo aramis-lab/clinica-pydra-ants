@@ -544,7 +544,6 @@ def registration_syn(
     dimensionality: int,
     fixed_image: PathLike,
     moving_image: PathLike,
-    is_large_image: bool = False,
     output_prefix: str = "output",
     transform_type: str = "s",
     num_bins: int = 32,
@@ -559,6 +558,7 @@ def registration_syn(
     reproducible: bool = False,
     random_seed: Optional[int] = None,
     verbose: bool = False,
+    large: bool = False,
     quick: bool = False,
     **kwargs,
 ) -> Registration:
@@ -575,9 +575,6 @@ def registration_syn(
         Fixed image, also referred to as source image.
     moving_image : path_like
         Moving image, also referred to as target image.
-    is_large_image : bool, default=False
-        Whether registration is performed on images considered "large".
-        ANTs considers input images to be large if any dimension is over 256.
     output_prefix : str, default="output"
         Prefix prepended to all output files.
     transform_type : {"t", "r", "a", "s", "sr", "so", "b", "br", "bo"}, default="s"
@@ -617,8 +614,11 @@ def registration_syn(
         Specify a custom random seed for reproducibility.
     verbose : bool, default=False
         Enable verbose logging.
+    large : bool, default=False
+        Use a set of parameters optimized for large images.
+        ANTs considers input images to be "large" if any dimension is over 256.
     quick : bool, default=False
-        Use a set parameters for faster convergence.
+        Use a set of parameters optimized for faster convergence.
     **kwargs : dict, optional
         Extra arguments passed to the task constructor.
 
@@ -652,7 +652,7 @@ def registration_syn(
     ...     dimensionality=3,
     ...     fixed_image="reference.nii.gz",
     ...     moving_image="structural.nii.gz",
-    ...     is_large_image=True,
+    ...     large=True,
     ... )
     >>> task.cmdline    # doctest: +ELLIPSIS
     'antsRegistration ... -c [1000x500x250x100,1e-06,10] -f 12x8x4x2 -s 4x3x2x1vox ... \
@@ -697,8 +697,8 @@ def registration_syn(
         rigid_sampling_strategy="Regular",
         rigid_sampling_rate=0.25,
         rigid_convergence=(1000, 500, 250, 0 if quick else 100),
-        rigid_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
-        rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
+        rigid_shrink_factors=(12, 8, 4, 2) if large else (8, 4, 2, 1),
+        rigid_smoothing_sigmas=(4, 3, 2, 1) if large else (3, 2, 1, 0),
         enable_affine_stage=transform_type in {"a", "b", "s"},
         affine_transform_type="Affine",
         affine_metric="GC" if reproducible else "MI",
@@ -707,8 +707,8 @@ def registration_syn(
         affine_sampling_strategy="Regular",
         affine_sampling_rate=0.25,
         affine_convergence=(1000, 500, 250, 0 if quick else 100),
-        affine_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
-        affine_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
+        affine_shrink_factors=(12, 8, 4, 2) if large else (8, 4, 2, 1),
+        affine_smoothing_sigmas=(4, 3, 2, 1) if large else (3, 2, 1, 0),
         enable_syn_stage=transform_type[0] in {"b", "s"},
         syn_transform_type="BSplineSyn" if transform_type[0] == "b" else "Syn",
         syn_gradient_step=gradient_step,
@@ -717,10 +717,10 @@ def registration_syn(
         syn_radius=radius,
         syn_num_bins=num_bins,
         syn_convergence=(
-            (100, 100, 70, 50, 0 if quick else 20) if is_large_image else (100, 70, 50, 0 if quick else 20)
+            (100, 100, 70, 50, 0 if quick else 20) if large else (100, 70, 50, 0 if quick else 20)
         ),
-        syn_shrink_factors=(10, 6, 4, 2, 1) if is_large_image else (8, 4, 2, 1),
-        syn_smoothing_sigmas=(5, 3, 2, 1, 0) if is_large_image else (3, 2, 1, 0),
+        syn_shrink_factors=(10, 6, 4, 2, 1) if large else (8, 4, 2, 1),
+        syn_smoothing_sigmas=(5, 3, 2, 1, 0) if large else (3, 2, 1, 0),
         use_histogram_matching=use_histogram_matching,
         use_float_precision=use_float_precision,
         use_minc_format=use_minc_format,
