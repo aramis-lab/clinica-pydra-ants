@@ -218,13 +218,13 @@ class Registration(ShellCommandTask):
 
         enable_rigid_stage = field(default=True, metadata={"help_string": "enable rigid registration stage"})
 
-        rigid_transform: str = field(
+        rigid_transform_type: str = field(
             default="Rigid",
             metadata={
-                "help_string": "transform for rigid stage",
+                "help_string": "transform type for rigid stage",
                 "allowed_values": {"Rigid", "Translation"},
-                "formatter": lambda enable_rigid_stage, rigid_transform, rigid_gradient_step: (
-                    f"-t {rigid_transform}[{rigid_gradient_step}]" if enable_rigid_stage else ""
+                "formatter": lambda enable_rigid_stage, rigid_transform_type, rigid_gradient_step: (
+                    f"-t {rigid_transform_type}[{rigid_gradient_step}]" if enable_rigid_stage else ""
                 ),
             },
         )
@@ -311,13 +311,13 @@ class Registration(ShellCommandTask):
 
         enable_affine_stage: bool = field(default=True, metadata={"help_string": "enable affine registration stage"})
 
-        affine_transform: str = field(
+        affine_transform_type: str = field(
             default="Affine",
             metadata={
-                "help_string": "affine transform",
+                "help_string": "transform type for affine stage",
                 "allowed_values": {"Affine", "CompositeAffine", "Similarity"},
-                "formatter": lambda enable_affine_stage, affine_transform, affine_gradient_step: (
-                    f"-t {affine_transform}[{affine_gradient_step}]" if enable_affine_stage else ""
+                "formatter": lambda enable_affine_stage, affine_transform_type, affine_gradient_step: (
+                    f"-t {affine_transform_type}[{affine_gradient_step}]" if enable_affine_stage else ""
                 ),
             },
         )
@@ -408,16 +408,16 @@ class Registration(ShellCommandTask):
 
         enable_syn_stage: str = field(default=True, metadata={"help_string": "enable SyN registration stage"})
 
-        syn_transform: str = field(
+        syn_transform_type: str = field(
             default="Syn",
             metadata={
-                "help_string": "SyN transform",
+                "help_string": "transform type for SyN stage",
                 "allowed_values": {"GaussianDisplacementField", "SyN", "BSplineSyN"},
-                "formatter": lambda enable_syn_stage, syn_transform, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_spline_distance, syn_spline_order: (
+                "formatter": lambda enable_syn_stage, syn_transform_type, syn_gradient_step, syn_flow_sigma, syn_total_sigma, syn_spline_distance, syn_spline_order: (
                     "-t {}[{}]".format(
-                        syn_transform,
+                        syn_transform_type,
                         f"{syn_gradient_step},{syn_spline_distance},0,{syn_spline_order}"
-                        if syn_transform == "BSplineSyn"
+                        if syn_transform_type == "BSplineSyn"
                         else f"{syn_gradient_step},{syn_flow_sigma},{syn_total_sigma}",
                     )
                     if enable_syn_stage
@@ -692,7 +692,7 @@ def registration_syn(
         lower_quantile=0.005,
         upper_quantile=0.995,
         enable_rigid_stage=transform_type not in {"bo", "so"},
-        rigid_transform="Translation" if transform_type == "t" else "Rigid",
+        rigid_transform_type="Translation" if transform_type == "t" else "Rigid",
         rigid_metric="GC" if reproducible else "MI",
         rigid_radius=1,
         rigid_num_bins=32,
@@ -702,7 +702,7 @@ def registration_syn(
         rigid_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         rigid_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
         enable_affine_stage=transform_type in {"a", "b", "s"},
-        affine_transform="Affine",
+        affine_transform_type="Affine",
         affine_metric="GC" if reproducible else "MI",
         affine_radius=1,
         affine_num_bins=32,
@@ -712,7 +712,7 @@ def registration_syn(
         affine_shrink_factors=(12, 8, 4, 2) if is_large_image else (8, 4, 2, 1),
         affine_smoothing_sigmas=(4, 3, 2, 1) if is_large_image else (3, 2, 1, 0),
         enable_syn_stage=transform_type[0] in {"b", "s"},
-        syn_transform="BSplineSyn" if transform_type[0] == "b" else "Syn",
+        syn_transform_type="BSplineSyn" if transform_type[0] == "b" else "Syn",
         syn_gradient_step=gradient_step,
         syn_spline_distance=spline_distance,
         syn_metric="CC" if reproducible else "MI",
