@@ -103,11 +103,11 @@ class Registration(ShellCommandTask):
                 "help_string": "interpolation parameter",
                 "readonly": True,
                 "formatter": lambda interpolator, sigma, alpha, order: (
-                    "-n {}[{}]".format(
+                    "-n {}{}".format(
                         interpolator,
-                        f"{sigma},{alpha}"
+                        f"[{sigma},{alpha}]"
                         if interpolator == "Gaussian"
-                        else f"{order}"
+                        else f"[{order}]"
                         if interpolator == "BSpline"
                         else "",
                     )
