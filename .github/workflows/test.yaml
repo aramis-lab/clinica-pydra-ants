@@ -1,4 +1,4 @@
-name: ci
+name: test
 
 on:
   push:
@@ -24,10 +24,10 @@ jobs:
           python-version: '3.x'
       - name: Install Hatch
         run: pipx install hatch
-      - name: Run formatter
-        run: hatch fmt
+      - name: Run static analysis
+        run: hatch fmt --check
 
-  test:
+  run:
     strategy:
       fail-fast: false
       matrix:

@@ -1,4 +1,4 @@
-name: publish
+name: release
 
 on:
   release:
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  pypi:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
