@@ -1,8 +1,7 @@
-# pydra-ants
+# clinica-pydra-ants
 
 [![PyPI - Version][pypi-version]][pypi-project]
 [![PyPI - Python Version][pypi-pyversions]][pypi-project]
-[![PyPI - Downloads][pypi-downloads]][pypi-project]
 ![][status-test]
 
 -----
@@ -77,8 +76,6 @@ This project is distributed under the terms of the [Apache License, Version 2.0]
 [license]: https://spdx.org/licenses/Apache-2.0.html
 
 [pydra]: https://pydra.readthedocs.io/
-
-[pypi-downloads]: https://static.pepy.tech/badge/clinica-pydra-ants
 
 [pypi-project]: https://pypi.org/project/clinica-pydra-ants
 
