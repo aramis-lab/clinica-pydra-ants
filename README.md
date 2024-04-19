@@ -34,7 +34,7 @@ segmentation and statistical analysis.
 ## Installation
 
 ```console
-pip install pydra-ants
+pip install clinica-pydra-ants
 ```
 
 A separate installation of ANTs is required to use this package.
