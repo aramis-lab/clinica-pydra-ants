@@ -16,7 +16,7 @@ keywords = [
   "registration",
 ]
 authors = [
-  { name = "Ghislain Vaillant", email = "ghislain.vaillant@icm-institute.org" },
+  { name = "Ghislain Vaillant", email = "ghislain.vaillant@inria.fr" },
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
